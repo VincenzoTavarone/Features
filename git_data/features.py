@@ -1,5 +1,4 @@
-import os
-import json
+import os, json, re
 from git import Repo, Blob, Tree
 
 def getTreeContent(tree):
@@ -54,14 +53,31 @@ def instability(commits):
 		internal_clock+=1
 		first = commits[i]
 
-	print json.dumps(files, indent = 4,  separators = (',',':'))
-	return
+	# print json.dumps(files, indent = 4,  separators = (',',':'))
+	return files
 
 def change_complexity():
 	return
 
-def bugginess():
-	return
+# https://help.github.com/articles/closing-issues-using-keywords/
+def bugginess(commits):
+	
+	bugginess = 0
+
+	#pattern
+	close_pattern = re.compile(r'close(s|d)?', re.IGNORECASE)
+	bug_pattern = re.compile(r'bug(fix)?', re.IGNORECASE)
+	fix_pattern = re.compile(r'fix(es|ed|ing)?', re.IGNORECASE)
+	resolve_pattern = re.compile(r'resolve(s|d)?', re.IGNORECASE)
+
+	for commit in commits:
+		if 	close_pattern.search(commit.message) or \
+			bug_pattern.search(commit.message) or \
+			fix_pattern.search(commit.message) or \
+			resolve_pattern.search(commit.message) :
+				bugginess+=1
+
+	return bugginess
 
 def main():
 
@@ -72,8 +88,8 @@ def main():
 
 	if not repository.bare : 
 		commits = list(repository.iter_commits('master'))
-		instability(commits)
-
+		# features_one = instability(commits)
+		features_three = bugginess(commits)
 
 
 if __name__ == '__main__':
