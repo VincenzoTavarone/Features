@@ -63,8 +63,14 @@ def instability(commits):
 	# print json.dumps(files, indent = 4,  separators = (',',':'))
 	return files
 
-def change_complexity():
-	return
+def changeComplexity(commits):
+	
+	stats = []
+	for commit in commits:
+		stats = [commit.stats.files] + stats
+
+	# print json.dumps(stats, indent = 4, separators = (',',':'))
+	return stats
 
 # https://help.github.com/articles/closing-issues-using-keywords/
 def bugginess(commits):
@@ -95,9 +101,10 @@ def main():
 
 	if not repository.bare : 
 		commits = list(repository.iter_commits('master'))
-		features_one = instability(commits)
+		# features_one = instability(commits)
+		features_two = changeComplexity(commits)
 		# features_three = bugginess(commits)
-		print json.dumps(features_one, indent = 4, separators = (',',':'))
+		print json.dumps(features_two, indent = 4, separators = (',',':'))
 
 if __name__ == '__main__':
 	main()
