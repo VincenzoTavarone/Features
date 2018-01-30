@@ -10,6 +10,7 @@ def getTreeContent(tree):
 			files[str(node.path)] = {
 				'obj_id' : str(node),
 				'created_at' : 1,
+				'last_edit' : 1,
 				'modified_at' : []
 			}
 	return files
@@ -26,30 +27,36 @@ def instability(commits):
 	internal_clock = 2
 
 	for i in xrange(len(commits) - 2, -1, -1):
-		print internal_clock
-		print commits[i].message
+
+		# print internal_clock
+		# print commits[i].message
+
 		for diff in commits[i].diff(first):
-			print diff.change_type, diff.a_rawpath
+			# print diff.change_type, diff.a_rawpath
 			#aggiunto al working tree
 			if diff.change_type == 'D' or diff.a_mode is None : 
 				files[str(diff.a_rawpath)] = {
 					'obj_id' : '',
 					'created_at' : internal_clock,
+					'last_edit' : internal_clock,
 					'modified_at': []
 				}
 			#modificato
 			if diff.change_type == 'M': 
+
 				created_at = files[str(diff.a_rawpath)].get('created_at')
 				modified_at = files[str(diff.a_rawpath)].get('modified_at')
-				if len(modified_at) == 0 : 
-					modified_at.append(internal_clock-created_at)
-				else :
-					modified_at.append(internal_clock-modified_at[-1])
+				last_edit = files[str(diff.a_rawpath)].get('last_edit')
+	
+				modified_at.append(internal_clock-last_edit)
+
 				files[str(diff.a_rawpath)] = {
 					'obj_id' : str(diff.a_blob),
 					'created_at' : created_at,
+					'last_edit' : internal_clock,
 					'modified_at' : modified_at
 				}
+
 		internal_clock+=1
 		first = commits[i]
 
@@ -88,9 +95,9 @@ def main():
 
 	if not repository.bare : 
 		commits = list(repository.iter_commits('master'))
-		# features_one = instability(commits)
-		features_three = bugginess(commits)
-
+		features_one = instability(commits)
+		# features_three = bugginess(commits)
+		print json.dumps(features_one, indent = 4, separators = (',',':'))
 
 if __name__ == '__main__':
 	main()
