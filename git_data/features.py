@@ -7,12 +7,13 @@ def getTreeContent(tree):
 		if isinstance(node, Tree):
 			files.update(getTreeContent(node))
 		else : 
-			files[str(node.path)] = {
-				'obj_id' : str(node),
-				'created_at' : 1,
-				'last_edit' : 1,
-				'modified_at' : []
-			}
+			if ".java" in node.path : 
+				files[str(node.path)] = {
+					'obj_id' : str(node),
+					'created_at' : 1,
+					'last_edit' : 1,
+					'modified_at' : []
+				}
 	return files
 
 def instability(commits):
@@ -28,13 +29,12 @@ def instability(commits):
 
 	for i in xrange(len(commits) - 2, -1, -1):
 
-		# print internal_clock
 		# print commits[i].message
 
-		for diff in commits[i].diff(first):
+		for diff in commits[i].diff(first) :
 			# print diff.change_type, diff.a_rawpath
 			#aggiunto al working tree
-			if diff.change_type == 'D' or diff.a_mode is None : 
+			if (diff.change_type == 'D' or diff.a_mode is None) and ".java" in diff.a_rawpath : 
 				files[str(diff.a_rawpath)] = {
 					'obj_id' : '',
 					'created_at' : internal_clock,
@@ -42,7 +42,7 @@ def instability(commits):
 					'modified_at': []
 				}
 			#modificato
-			if diff.change_type == 'M': 
+			if diff.change_type == 'M' and ".java" in diff.a_rawpath : 
 
 				created_at = files[str(diff.a_rawpath)].get('created_at')
 				modified_at = files[str(diff.a_rawpath)].get('modified_at')
@@ -82,11 +82,13 @@ def bugginess(commits):
 	bug_pattern = re.compile(r'bug(fix)?', re.IGNORECASE)
 	fix_pattern = re.compile(r'fix(es|ed|ing)?', re.IGNORECASE)
 	resolve_pattern = re.compile(r'resolve(s|d)?', re.IGNORECASE)
+	issue_pattern = re.compile(r'#[1-9][0-9]*', re.IGNORECASE)
 
 	for commit in commits:
 		if 	close_pattern.search(commit.message) or \
 			bug_pattern.search(commit.message) or \
 			fix_pattern.search(commit.message) or \
+			issue_pattern.search(commit.message) or \
 			resolve_pattern.search(commit.message) :
 				bugginess+=1
 
@@ -102,9 +104,9 @@ def main():
 	if not repository.bare : 
 		commits = list(repository.iter_commits('master'))
 		# features_one = instability(commits)
-		features_two = changeComplexity(commits)
-		# features_three = bugginess(commits)
-		print json.dumps(features_two, indent = 4, separators = (',',':'))
+		# features_two = changeComplexity(commits)
+		features_three = bugginess(commits)
+		print json.dumps(features_three, indent = 4, separators = (',',':'))
 
 if __name__ == '__main__':
 	main()
