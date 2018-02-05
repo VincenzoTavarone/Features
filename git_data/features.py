@@ -1,4 +1,4 @@
-import os, json, re
+import re
 from git import Repo, Blob, Tree
 
 def getTreeContent(tree):
@@ -21,7 +21,7 @@ def instability(commits):
 	first = commits[len(commits)-1]
 
 	files = getTreeContent(first.tree)
-	
+
 	#bisogna contare anche il primo commit
 	internal_clock = 2
 
@@ -40,8 +40,6 @@ def instability(commits):
 
 			#modificato
 			if diff.change_type == 'M' and ".java" in diff.a_rawpath : 
-				if diff.renamed : 
-					print 'file rinominato'
 				created_at = files[str(diff.a_rawpath)].get('created_at')
 				modified_at = files[str(diff.a_rawpath)].get('modified_at')
 				last_edit = files[str(diff.a_rawpath)].get('last_edit')
@@ -130,20 +128,3 @@ def bugginess(commits):
 							}
 
 	return bugginess
-
-def main():
-
-	#repo for test
-	path = '/home/vincenzo/eclipse-workspace/compressione'
-
-	repository = Repo(path)
-
-	if not repository.bare : 
-		commits = list(repository.iter_commits('master'))
-		features_one = instability(commits)
-		# features_two = changeComplexity(commits)
-		# features_three = bugginess(commits)
-		print json.dumps(features_one, sort_keys = True, indent = 4, separators = (',',':'))
-
-if __name__ == '__main__':
-	main()
