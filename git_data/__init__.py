@@ -16,7 +16,8 @@ def medianNumber(modifications) :
 def test():
 
 	#repo for test
-	path = '/home/vincenzo/eclipse-workspace/compressione'
+	path = '/home/vincenzo/Scrivania/dataset/camel'
+	# path = '/home/vincenzo/compilatori'
 
 	repository = Repo(path)
 
@@ -31,7 +32,7 @@ def test():
 		result_as_json = json.dumps(features_one, sort_keys = True, indent = 4, separators = (',',':'))
 		features_one = json.loads(result_as_json, object_pairs_hook = OrderedDict)
 
-		with open("../csv/test.csv", "w+") as csv :
+		with open("../csv/camel-instability.csv", "w+") as csv :
 			csv.write("filename, instability")
 			for k,v in features_one.iteritems():
 				class_name = k

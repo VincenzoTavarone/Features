@@ -58,7 +58,7 @@ def instability(commits):
 				del files[str(diff.a_rawpath)]
 
 			#rinominato
-			if diff.renamed and ".java" in diff.a_rawpath : 
+			if diff.renamed and (".java" in diff.a_rawpath and ".java" in diff.b_rawpath) :
 				tmp = files[str(diff.rename_to)]
 				del files[str(diff.rename_to)]
 				files[str(diff.rename_from)] = tmp
