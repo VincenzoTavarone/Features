@@ -12,8 +12,18 @@ def medianNumber(modifications) :
 		median = modifications[len(modifications)/2]
 	return median
 
+def avgComplexity(data) : 
+	avg = 0.0
+	if data['lines'] == 0 : 
+		return 0
+	else : 
+		for number in data['modifications'] : 
+			avg += number
+		avg = avg/len(data['modifications'])
+		return avg
+
 #main definito per il testing
-def test():
+def main_instability():
 
 	#repo for test
 	path = '/home/vincenzo/Scrivania/dataset/camel'
@@ -32,7 +42,7 @@ def test():
 		result_as_json = json.dumps(features_one, sort_keys = True, indent = 4, separators = (',',':'))
 		features_one = json.loads(result_as_json, object_pairs_hook = OrderedDict)
 
-		with open("../csv/camel-instability.csv", "w+") as csv :
+		with open("../csv/instability/camel-instability.csv", "w+") as csv :
 			csv.write("filename, instability")
 			for k,v in features_one.iteritems():
 				class_name = k
@@ -45,5 +55,45 @@ def test():
 				line = "\n" + class_name + ", " + str(median)
 				csv.write(line)
 
+
+def main_changeComplexity() : 
+
+	path = '/home/vincenzo/Scrivania/dataset/zeppelin'
+
+	repository = Repo(path)
+
+	if not repository.bare : 
+		commits = list(repository.iter_commits('master'))
+		features_two = changeComplexity(commits)
+		result_as_json = json.dumps(features_two, sort_keys = True, indent = 4, separators = (',',':'))
+		features_two = json.loads(result_as_json, object_pairs_hook = OrderedDict)
+
+		with open("../csv/change_complexity/zeppelin-change_complexity.csv", "w+") as csv : 
+			csv.write("filename, change complexity")
+			for k,v in features_two.iteritems() : 
+				class_name =  k
+				change_complexity = avgComplexity(v)
+				if change_complexity != 0 : 
+					line = "\n" + class_name + ", " + str(change_complexity)
+					csv.write(line)
+
+def main_bugginess() : 
+	
+	path  = '/home/vincenzo/Scrivania/dataset/zeppelin'
+
+	repository = Repo(path)
+
+	if not repository.bare : 
+		commits = list(repository.iter_commits('master'))
+		features_three = bugginess(commits)
+		result_as_json = json.dumps(features_three, sort_keys = True, indent = 4, separators = (',',':'))
+		features_three = json.loads(result_as_json, object_pairs_hook = OrderedDict)
+
+		with open("../csv/bugginess/zeppelin-bugginess.csv", "w+") as csv : 
+			csv.write("filename, bugginess")
+			for k, v in features_three.iteritems() :
+				line = "\n" + k + ", " + str(v['bugginess'])
+				csv.write(line)	
+
 if __name__ == '__main__':
-	test()
+	main_bugginess()
