@@ -3,11 +3,12 @@ from git import Repo, Blob, Tree
 
 def getTreeContent(tree):
 	files = {}
+	java_file = re.compile(r'.+\.java$')
 	for node in tree : 
 		if isinstance(node, Tree):
 			files.update(getTreeContent(node))
 		else : 
-			if ".java" in node.path : 
+			if java_file.match(node.path) : 
 				files[str(node.path)] = {
 					'obj_id' : str(node),
 					'created_at' : 1,
