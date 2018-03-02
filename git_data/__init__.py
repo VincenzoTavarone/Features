@@ -1,7 +1,7 @@
 import os, json
 from collections import OrderedDict
 from git import Repo
-from features import instability, changeComplexity, bugginess
+from features import instability, bugginess, change_complexity_fun
 
 def medianNumber(modifications) :
 	modifications.sort()
@@ -58,17 +58,17 @@ def main_instability():
 
 def main_changeComplexity() : 
 
-	path = '/home/vincenzo/Scrivania/dataset/zeppelin'
+	path = '/home/vincenzo/Scrivania/dataset/umlet'
 
 	repository = Repo(path)
 
 	if not repository.bare : 
 		commits = list(repository.iter_commits('master'))
-		features_two = changeComplexity(commits)
+		features_two = change_complexity_fun(commits)
 		result_as_json = json.dumps(features_two, sort_keys = True, indent = 4, separators = (',',':'))
 		features_two = json.loads(result_as_json, object_pairs_hook = OrderedDict)
 
-		with open("../csv/change_complexity/zeppelin-change_complexity.csv", "w+") as csv : 
+		with open("../csv/change_complexity_1/umlet-change_complexity.csv", "w+") as csv : 
 			csv.write("filename, change complexity")
 			for k,v in features_two.iteritems() : 
 				class_name =  k
@@ -79,7 +79,7 @@ def main_changeComplexity() :
 
 def main_bugginess() : 
 	
-	path  = '/home/vincenzo/Scrivania/dataset/zeppelin'
+	path  = '/home/vincenzo/Scrivania/dataset/umlet'
 
 	repository = Repo(path)
 
@@ -89,7 +89,7 @@ def main_bugginess() :
 		result_as_json = json.dumps(features_three, sort_keys = True, indent = 4, separators = (',',':'))
 		features_three = json.loads(result_as_json, object_pairs_hook = OrderedDict)
 
-		with open("../csv/bugginess/zeppelin-bugginess.csv", "w+") as csv : 
+		with open("../csv/bugginess_1/umlet-bugginess.csv", "w+") as csv : 
 			csv.write("filename, bugginess")
 			for k, v in features_three.iteritems() :
 				line = "\n" + k + ", " + str(v['bugginess'])

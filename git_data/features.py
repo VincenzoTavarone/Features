@@ -17,6 +17,33 @@ def getTreeContent(tree):
 				}
 	return files
 
+def getTreeForCC(tree) : 
+	files = {}
+	java_file = re.compile(r'.+\.java$')
+	for node in tree : 
+		if isinstance(node, Tree):
+			files.update(getTreeForCC(node))
+		else : 
+			if java_file.match(node.path) : 
+				files[str(node.path)] = {
+					'lines' : 0,
+					'modifications' : []
+				}
+	return files
+
+def getTreeForBugginess(tree) : 
+	files = {}
+	java_file = re.compile(r'.+\.java$')
+	for node in tree : 
+		if isinstance(node, Tree):
+			files.update(getTreeForBugginess(node))
+		else : 
+			if java_file.match(node.path) : 
+				files[str(node.path)] = {
+					'bugginess' : 0
+				}
+	return files
+
 def instability(commits):
 	#ricavo il primo commit
 	first = commits[len(commits)-1]
@@ -120,7 +147,7 @@ def changeComplexity(commits):
 # https://help.github.com/articles/closing-issues-using-keywords/
 def bugginess(commits):
 	
-	bugginess = {}
+	bugginess = getTreeForBugginess(commits[0].tree)
 
 	java_file = re.compile(r'.+\.java$')
 
@@ -131,7 +158,7 @@ def bugginess(commits):
 	resolve_pattern = re.compile(r'resolve(s|d)?', re.IGNORECASE)
 	issue_pattern = re.compile(r'#[1-9][0-9]*', re.IGNORECASE)
 
-	for i in xrange(len(commits) - 1, -1, -1) :
+	for i in xrange(1, len(commits)) :
 		commit = commits[i]
 		if 	close_pattern.search(commit.message) or \
 			bug_pattern.search(commit.message) or \
@@ -145,9 +172,29 @@ def bugginess(commits):
 							bugginess[str(key)] = {
 								'bugginess' : bugginess[str(key)].get('bugginess') + 1
 							}
-						else : 
-							bugginess[str(key)] = {
-								'bugginess' : 1
-							}
 
 	return bugginess
+
+
+def change_complexity_fun(commits) :
+
+	stats = {}
+
+	java_file = re.compile(r'.+\.java$')
+
+	stats = getTreeForCC(commits[0].tree)
+
+	for i in xrange(1,len(commits)) : 
+		files = commits[i].stats.files
+		for key, value in files.iteritems():
+			if java_file.match(key) : 
+				if str(key) in stats : 
+					lines = stats[str(key)].get('lines') + value.get('insertions') - value.get('deletions')
+					modifications =  stats[str(key)].get('modifications')
+					modifications.append(value.get('lines'))
+					stats[str(key)] = {
+						'lines' : lines,
+						'modifications' : modifications
+					}
+
+	return stats
